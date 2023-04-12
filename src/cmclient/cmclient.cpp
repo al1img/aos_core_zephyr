@@ -48,8 +48,18 @@ aos::Error CMClient::Init(LauncherItf& launcher, ResourceManager& resourceManage
     mDownloader = &downloader;
 
     auto err = mThread.Run([this](void*) {
-        ConnectToCM();
-        ProcessMessages();
+        while (true) {
+            ConnectToCM();
+
+            auto err = ProcessMessages();
+            if (!err.IsNone()) {
+                LOG_DBG() << "Process messages error: " << err;
+
+                continue;
+            }
+
+            break;
+        }
     });
     if (!err.IsNone()) {
         return AOS_ERROR_WRAP(err);
@@ -149,27 +159,40 @@ void CMClient::ConnectToCM()
         connected = true;
     } while (!connected);
 
-    SendNodeConfiguration();
+    LOG_INF() << "Connected to vchan";
 
-    auto err = mLauncher->RunLastInstances();
-    if (!err.IsNone()) {
-        LOG_ERR() << "Can't run last instances: " << err;
-    }
+    mSMvchanHandler.blocking = true;
+    /*
+        SendNodeConfiguration();
 
+        auto err = mLauncher->RunLastInstances();
+        if (!err.IsNone()) {
+            LOG_ERR() << "Can't run last instances: " << err;
+        }
+    */
     return;
 }
 
-void CMClient::ProcessMessages()
+aos::Error CMClient::ProcessMessages()
 {
     VchanMessageHeader header;
 
     while (!atomic_test_bit(&mFinishReadTrigger, 0)) {
-        ReadDataFromVChan(&mSMvchanHandler, &header, sizeof(VchanMessageHeader));
-        ReadDataFromVChan(&mSMvchanHandler, mReceiveBuffer.Get(), header.dataSize);
+        auto err = ReadDataFromVChan(&mSMvchanHandler, &header, sizeof(VchanMessageHeader));
+        if (!err.IsNone()) {
+            return err;
+        }
+
+        err = ReadDataFromVChan(&mSMvchanHandler, mReceiveBuffer.Get(), header.dataSize);
+        if (!err.IsNone()) {
+            return err;
+        }
+
+        continue;
 
         SHA256Digest calculatedDigest;
 
-        auto err = CalculateSha256(mReceiveBuffer, header.dataSize, calculatedDigest);
+        err = CalculateSha256(mReceiveBuffer, header.dataSize, calculatedDigest);
         if (!err.IsNone()) {
             LOG_ERR() << "Can't calculate SHA256: " << err;
             continue;
@@ -228,6 +251,8 @@ void CMClient::ProcessMessages()
             break;
         }
     }
+
+    return aos::ErrorEnum::eNone;
 }
 
 void CMClient::SendNodeConfiguration()
@@ -532,17 +557,28 @@ void CMClient::ProcessImageContentChunk()
     }
 }
 
-void CMClient::ReadDataFromVChan(vch_handle* vchanHandler, void* des, size_t size)
+aos::Error CMClient::ReadDataFromVChan(vch_handle* vchanHandler, void* des, size_t size)
 {
     int readSize = 0;
 
+    printk("=== Read start: %d\n", size);
+
     while (static_cast<size_t>(readSize) < size) {
         auto read = vch_read(vchanHandler, reinterpret_cast<uint8_t*>(des) + readSize, size - readSize);
-        if (read <= 0) {
+        if (read < 0) {
+            return read;
+        }
+
+        if (read == 0) {
             usleep(50000);
-            continue;
+        } else {
+            printk("=== Read try: %d\n", read);
         }
 
         readSize += read;
     }
+
+    printk("=== Read done: %d\n", readSize);
+
+    return aos::ErrorEnum::eNone;
 }

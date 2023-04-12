@@ -27,11 +27,13 @@ manifest:
     - name: oleksiimoisieiev
       url-base: https://github.com/oleksiimoisieiev
 
+    - name: sa-kib
+      url-base: https://github.com/sa-kib
 
   projects:
     - name: zephyr
-      remote: oleksiimoisieiev
-      revision: vch
+      remote: xen-troops
+      revision: aos-wip
       west-commands: scripts/west-commands.yml
 
     - name: aos_core_lib_cpp
@@ -43,7 +45,7 @@ manifest:
       revision: feature_zephyr
 
     - name: zephyr-xenlib
-      remote: oleksiimoisieiev
+      remote: sa-kib
       revision: vch
 
     - name: littlefs

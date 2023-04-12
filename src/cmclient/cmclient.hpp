@@ -97,7 +97,7 @@ private:
     servicemanager_v3_SMOutgoingMessages mOutgoingMessage;
     aos::Mutex                           mSendMutex;
 
-    void                             ProcessMessages();
+    aos::Error                       ProcessMessages();
     void                             ConnectToCM();
     void                             SendNodeConfiguration();
     aos::Error                       SendPbMessageToVchan();
@@ -110,7 +110,7 @@ private:
     void                             ProcessRunInstancesMessage();
     void                             ProcessImageContentInfo();
     void                             ProcessImageContentChunk();
-    void                             ReadDataFromVChan(vch_handle* vchanHandler, void* des, size_t size);
+    aos::Error                       ReadDataFromVChan(vch_handle* vchanHandler, void* des, size_t size);
 };
 
 #endif
