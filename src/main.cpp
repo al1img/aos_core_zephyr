@@ -21,6 +21,8 @@
 #include "domains/dom_runner.h"
 #endif
 
+#include <psa/crypto.h>
+
 int main(void)
 {
     printk("*** Aos zephyr application: %s ***\n", AOS_ZEPHYR_APP_VERSION);
@@ -38,13 +40,30 @@ int main(void)
         printk("Failed to create domain (%d)\n", ret);
     }
 #endif
-
+#if 0
     Logger::Init();
 
     auto& app = App::Get();
 
     auto err = app.Init();
     __ASSERT(err.IsNone(), "Error initializing application: %s", err.Message());
+#endif
+
+    psa_status_t status;
+    uint8_t      randoms[12];
+
+    status = psa_crypto_init();
+    if (status != PSA_SUCCESS) {
+        printk("psa_crypto_init() failed: %d", status);
+        return 0;
+    }
+
+    status = psa_generate_random(randoms, sizeof(randoms));
+    if (status == PSA_SUCCESS) {
+        printk("Generated random numbers.\n");
+    } else {
+        printk("Failed to generate random numbers: %d\n", status);
+    }
 
     return 0;
 }
