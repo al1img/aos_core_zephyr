@@ -61,3 +61,10 @@ manifest:
       path: modules/crypto/tinycrypt
       groups:
         - crypto
+
+    - name: mbedtls
+      remote: zephyrproject-rtos
+      revision: 6e166050075688fd3cf3d0cb3fc34a1c52df2496
+      path: modules/crypto/mbedtls
+      groups:
+        - crypto
