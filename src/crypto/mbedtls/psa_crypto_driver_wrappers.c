@@ -789,15 +789,11 @@ psa_status_t psa_driver_wrapper_get_builtin_key(psa_drv_slot_number_t slot_numbe
 
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION(attributes->core.lifetime);
     switch (location) {
-#if defined(PSA_CRYPTO_DRIVER_TEST)
-
 #if (defined(PSA_CRYPTO_DRIVER_AOS))
     case 0x800000:
         return (mbedtls_aos_opaque_get_builtin_key(
             slot_number, attributes, key_buffer, key_buffer_size, key_buffer_length));
 #endif
-
-#endif /* PSA_CRYPTO_DRIVER_TEST */
     default:
         (void)slot_number;
         (void)key_buffer;
