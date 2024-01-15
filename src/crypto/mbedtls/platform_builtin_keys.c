@@ -17,7 +17,8 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
 {
 #if defined(PSA_CRYPTO_DRIVER_AOS)
 
-    *lifetime    = PSA_CRYPTO_AOS_DRIVER_LOCATION;
+    *lifetime
+        = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_READ_ONLY, PSA_CRYPTO_AOS_DRIVER_LOCATION);
     *slot_number = 0;
 
     return PSA_SUCCESS;
