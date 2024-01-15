@@ -126,7 +126,10 @@ set_source_files_properties(
     PROPERTIES HEADER_FILE_ONLY ON
 )
 
-target_sources(app PRIVATE src/crypto/mbedtls/psa_crypto_driver_wrappers.c src/crypto/mbedtls/platform_builtin_keys.c)
+target_sources(
+    app PRIVATE src/crypto/mbedtls/psa_crypto_driver_wrappers.c src/crypto/mbedtls/platform_builtin_keys.c
+                src/crypto/mbedtls/drivers/aos/key_management.c
+)
 
 # ######################################################################################################################
 #  Generate API
