@@ -1,0 +1,21 @@
+{
+    "prefix": "mbedtls_aos",
+    "type": "opaque",
+    "location": "0x800000",
+    "mbedtls/h_condition": "defined(PSA_CRYPTO_DRIVER_AOS)",
+    "headers": [
+        "crypto/drivers/aos_driver.h"
+    ],
+    "capabilities": [
+        {
+            "_comment": "The Mbed TLS opaque driver supports get builtin key",
+            "mbedtls/c_condition": "defined(PSA_CRYPTO_DRIVER_AOS)",
+            "entry_points": [
+                "get_builtin_key"
+            ],
+            "names": {
+                "get_builtin_key": "mbedtls_aos_opaque_get_builtin_key"
+            }
+        }
+    ]
+}

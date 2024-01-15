@@ -121,22 +121,12 @@ add_dependencies(app version)
 
 set(mbedtls_source_dir ${APPLICATION_SOURCE_DIR}/../modules/crypto/mbedtls/)
 
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/modules/mbedtls/psa_crypto_driver_wrappers.c
-    COMMAND
-        ${MBEDTLS_PYTHON_EXECUTABLE} ${mbedtls_source_dir}/scripts/generate_driver_wrappers.py --mbedtls-root
-        ${mbedtls_source_dir} --json-dir ${CMAKE_CURRENT_SOURCE_DIR}/src/crypto/driver_jsons
-        ${CMAKE_CURRENT_BINARY_DIR}/modules/mbedtls
-    DEPENDS ${mbedtls_source_dir}/scripts/generate_driver_wrappers.py
-            ${mbedtls_source_dir}/scripts/data_files/driver_templates/psa_crypto_driver_wrappers.c.jinja mbedTLS
-)
-
 set_source_files_properties(
     ${APPLICATION_SOURCE_DIR}/../modules/crypto/mbedtls/library/psa_crypto_driver_wrappers.c TARGET_DIRECTORY mbedTLS
     PROPERTIES HEADER_FILE_ONLY ON
 )
 
-target_sources(app PRIVATE modules/mbedtls/psa_crypto_driver_wrappers.c)
+target_sources(app PRIVATE src/crypto/mbedtls/psa_crypto_driver_wrappers.c src/crypto/mbedtls/platform_builtin_keys.c)
 
 # ######################################################################################################################
 #  Generate API
