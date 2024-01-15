@@ -8,7 +8,6 @@
 #ifndef PSA_CRYPTO_AOS_DRIVER_H
 #define PSA_CRYPTO_AOS_DRIVER_H
 
-#if defined(PSA_CRYPTO_DRIVER_AOS)
 #ifndef PSA_CRYPTO_DRIVER_PRESENT
 #define PSA_CRYPTO_DRIVER_PRESENT
 #endif
@@ -18,6 +17,6 @@
 
 #define PSA_CRYPTO_AOS_DRIVER_LOCATION 0x800000
 
-#endif /* PSA_CRYPTO_DRIVER_AOS */
+#include "aos/key_management.h"
 
-#endif /* PSA_CRYPTO_AOS_DRIVER_H */
+#endif

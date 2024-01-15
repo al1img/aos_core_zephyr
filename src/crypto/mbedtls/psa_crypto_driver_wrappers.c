@@ -40,7 +40,7 @@
 #if defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 /* Headers for mbedtls_aos opaque driver */
 #if defined(PSA_CRYPTO_DRIVER_AOS)
-#include "crypto/drivers/aos_driver.h"
+#include "crypto/mbedtls/drivers/aos_driver.h"
 
 #endif
 

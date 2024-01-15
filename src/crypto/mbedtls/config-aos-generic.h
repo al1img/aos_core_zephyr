@@ -1232,7 +1232,7 @@
  *          compatibility with application code that relies on drivers,
  *          but the driver interfaces may change without notice.
  */
-// #define MBEDTLS_PSA_CRYPTO_DRIVERS
+#define MBEDTLS_PSA_CRYPTO_DRIVERS
 
 /** \def MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
  *
