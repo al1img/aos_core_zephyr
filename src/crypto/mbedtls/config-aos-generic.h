@@ -3924,3 +3924,5 @@
 // #define MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED
 
 /** \} name SECTION: Module configuration options */
+
+#define PSA_CRYPTO_DRIVER_AOS
