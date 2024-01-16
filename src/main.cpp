@@ -21,7 +21,10 @@
 #include "domains/dom_runner.h"
 #endif
 
-#include <psa/crypto.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/pk.h>
+#include <mbedtls/x509_csr.h>
 
 int main(void)
 {
@@ -49,21 +52,44 @@ int main(void)
     __ASSERT(err.IsNone(), "Error initializing application: %s", err.Message());
 #endif
 
-    psa_status_t status;
-    uint8_t      randoms[12];
+    mbedtls_x509write_csr    req;
+    mbedtls_entropy_context  entropy;
+    mbedtls_ctr_drbg_context ctrDrbg;
+    mbedtls_pk_context       pk;
 
-    status = psa_crypto_init();
-    if (status != PSA_SUCCESS) {
-        printk("psa_crypto_init() failed: %d", status);
-        return 0;
+    auto ret = psa_crypto_init();
+    if (ret != 0) {
+        printk("Error init psa: %d\n", ret);
+        return 1;
     }
 
-    status = psa_generate_random(randoms, sizeof(randoms));
-    if (status == PSA_SUCCESS) {
-        printk("Generated random numbers.\n");
-    } else {
-        printk("Failed to generate random numbers: %d\n", status);
+    mbedtls_pk_init(&pk);
+
+    ret = mbedtls_pk_setup_opaque(&pk, MBEDTLS_PSA_KEY_ID_BUILTIN_MIN);
+    if (ret != 0) {
+        printk("Error setup opaque: %d\n", ret);
+        return 1;
     }
+
+    mbedtls_x509write_csr_init(&req);
+    mbedtls_ctr_drbg_init(&ctrDrbg);
+    mbedtls_x509write_csr_set_md_alg(&req, MBEDTLS_MD_SHA256);
+
+    mbedtls_x509write_csr_set_key(&req, &pk);
+
+    unsigned char output_buf[4096];
+
+    memset(output_buf, 0, 4096);
+    ret = mbedtls_x509write_csr_pem(&req, output_buf, 4096, mbedtls_ctr_drbg_random, &ctrDrbg);
+    if (ret != 0) {
+        printk("Error create csr: %d\n", ret);
+        return 1;
+    }
+
+    mbedtls_x509write_csr_free(&req);
+    mbedtls_pk_free(&pk);
+    mbedtls_ctr_drbg_free(&ctrDrbg);
+    mbedtls_entropy_free(&entropy);
 
     return 0;
 }

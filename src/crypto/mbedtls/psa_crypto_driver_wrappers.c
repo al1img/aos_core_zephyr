@@ -571,6 +571,11 @@ psa_status_t psa_driver_wrapper_get_key_buffer_size(const psa_key_attributes_t* 
 
     *key_buffer_size = 0;
     switch (location) {
+#if defined(PSA_CRYPTO_DRIVER_AOS)
+    case PSA_CRYPTO_AOS_DRIVER_LOCATION:
+        *key_buffer_size = mbedtls_aos_opaque_size_function(MBEDTLS_SVC_KEY_ID_GET_KEY_ID(psa_get_key_id(attributes)));
+        return (PSA_SUCCESS);
+#endif /* PSA_CRYPTO_DRIVER_AOS */
 #if defined(PSA_CRYPTO_DRIVER_TEST)
     case PSA_CRYPTO_TEST_DRIVER_LOCATION:
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
@@ -769,6 +774,12 @@ psa_status_t psa_driver_wrapper_export_public_key(const psa_key_attributes_t* at
          * cycle through all known transparent accelerators */
 #if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT)
 
+#if (defined(PSA_CRYPTO_DRIVER_AOS))
+    case PSA_CRYPTO_AOS_DRIVER_LOCATION:
+        return (mbedtls_aos_opaque_export_public_key(
+            attributes, key_buffer, key_buffer_size, data, data_size, data_length));
+#endif
+
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
         /* Fell through, meaning no accelerator supports this operation */
         return (psa_export_public_key_internal(attributes, key_buffer, key_buffer_size, data, data_size, data_length));
@@ -790,7 +801,7 @@ psa_status_t psa_driver_wrapper_get_builtin_key(psa_drv_slot_number_t slot_numbe
     psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION(attributes->core.lifetime);
     switch (location) {
 #if (defined(PSA_CRYPTO_DRIVER_AOS))
-    case 0x800000:
+    case PSA_CRYPTO_AOS_DRIVER_LOCATION:
         return (mbedtls_aos_opaque_get_builtin_key(
             slot_number, attributes, key_buffer, key_buffer_size, key_buffer_length));
 #endif
