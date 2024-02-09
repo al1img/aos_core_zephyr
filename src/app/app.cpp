@@ -15,6 +15,22 @@
 App App::sApp;
 
 /***********************************************************************************************************************
+ * Static
+ **********************************************************************************************************************/
+
+void PrintCSR(const char* csr)
+{
+    auto        len = strlen(csr);
+    const char* p   = csr;
+    char        buffer[257];
+
+    while (p < csr + len) {
+        printk("%s", strncpy(buffer, p, sizeof(buffer) - 1));
+        p += sizeof(buffer) - 1;
+    }
+}
+
+/***********************************************************************************************************************
  * Public
  **********************************************************************************************************************/
 
@@ -43,33 +59,33 @@ aos::Error App::Init()
     if (!(err = mResourceUsageProvider.Init()).IsNone()) {
         return err;
     }
+    /*
+        if (!(err = mResourceMonitor.Init(mResourceUsageProvider, mCommunication, mCommunication)).IsNone()) {
+            return err;
+        }
 
-    if (!(err = mResourceMonitor.Init(mResourceUsageProvider, mCommunication, mCommunication)).IsNone()) {
-        return err;
-    }
+        if (!(err = mLauncher.Init(
+                  mServiceManager, mRunner, mJsonOciSpec, mCommunication, mStorage, mResourceMonitor, mCommunication))
+                 .IsNone()) {
+            return err;
+        }
 
-    if (!(err = mLauncher.Init(
-              mServiceManager, mRunner, mJsonOciSpec, mCommunication, mStorage, mResourceMonitor, mCommunication))
-             .IsNone()) {
-        return err;
-    }
+        if (!(err = mCommOpenChannel.Init(VChannel::cXSOpenReadPath, VChannel::cXSOpenWritePath)).IsNone()) {
+            return err;
+        }
 
-    if (!(err = mCommOpenChannel.Init(VChannel::cXSOpenReadPath, VChannel::cXSOpenWritePath)).IsNone()) {
-        return err;
-    }
+        if (!(err = mCommSecureChannel.Init(VChannel::cXSCloseReadPath, VChannel::cXSCloseWritePath)).IsNone()) {
+            return err;
+        }
 
-    if (!(err = mCommSecureChannel.Init(VChannel::cXSCloseReadPath, VChannel::cXSCloseWritePath)).IsNone()) {
-        return err;
-    }
+        if (!(err = mClockSync.Init(mCommunication)).IsNone()) {
+            return err;
+        }
 
-    if (!(err = mClockSync.Init(mCommunication)).IsNone()) {
-        return err;
-    }
-
-    if (!(err = mProvisioning.Init()).IsNone()) {
-        return err;
-    }
-
+        if (!(err = mProvisioning.Init()).IsNone()) {
+            return err;
+        }
+    */
     if (!(err = mCryptoProvider.Init()).IsNone()) {
         return err;
     }
@@ -77,12 +93,34 @@ aos::Error App::Init()
     if (!(err = InitCertHandler()).IsNone()) {
         return err;
     }
+    /*
+        if (!(err = mCommunication.Init(mCommOpenChannel, mCommSecureChannel, mLauncher, mCertHandler, mResourceManager,
+                  mResourceMonitor, mDownloader, mClockSync, mProvisioning))
+                 .IsNone()) {
+            return err;
+        }
+    */
+    return aos::ErrorEnum::eNone;
+}
 
-    if (!(err = mCommunication.Init(mCommOpenChannel, mCommSecureChannel, mLauncher, mCertHandler, mResourceManager,
-              mResourceMonitor, mDownloader, mClockSync, mProvisioning))
-             .IsNone()) {
+aos::Error App::TestCertHandler()
+{
+    auto err = mCertHandler.Clear("sm");
+    if (!err.IsNone()) {
         return err;
     }
+
+    err = mCertHandler.SetOwner("sm", "12345");
+    if (!err.IsNone()) {
+        return err;
+    }
+
+    err = mCertHandler.CreateKey("sm", "test", "12345", mCSR);
+    if (!err.IsNone()) {
+        return err;
+    }
+
+    PrintCSR(mCSR.CStr());
 
     return aos::ErrorEnum::eNone;
 }

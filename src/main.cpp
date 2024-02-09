@@ -33,6 +33,8 @@ int main(void)
     auto ret = littlefs_mount();
     __ASSERT(ret == 0, "Error mounting little FS: %d (%s)", ret, strerror(ret));
 
+    aos::FS::RemoveAll(CONFIG_OPTEE_STORAGE_ROOT);
+
     ret = TEE_SupplicantInit();
     __ASSERT(ret == 0, "Error initializing TEE supplicant: %d (%s)", ret, strerror(ret));
 
@@ -47,8 +49,12 @@ int main(void)
     auto& app = App::Get();
 
     auto err = app.Init();
-    __ASSERT(
-        err.IsNone(), "Error initializing application: %s (%s:%d)", err.Message(), err.FileName(), err.LineNumber());
+    __ASSERT(err.IsNone(), "Error initializing application: %s [%d] (%s:%d)", err.Message(), err.Errno(),
+        err.FileName(), err.LineNumber());
+
+    err = app.TestCertHandler();
+    __ASSERT(err.IsNone(), "Error test cert handler: %s [%d] (%s:%d)", err.Message(), err.Errno(), err.FileName(),
+        err.LineNumber());
 
     return 0;
 }

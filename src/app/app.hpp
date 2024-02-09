@@ -43,6 +43,8 @@ public:
      */
     static App& Get() { return sApp; };
 
+    aos::Error TestCertHandler();
+
 private:
     static constexpr auto cPKCS11ModuleLibrary    = AOS_CONFIG_CRYPTOUTILS_DEFAULT_PKCS11_LIB;
     static constexpr auto cPKCS11ModuleTokenLabel = "aoscore";
@@ -72,6 +74,8 @@ private:
     Runner                                  mRunner;
     Storage                                 mStorage;
     Provisioning                            mProvisioning;
+
+    aos::StaticString<aos::crypto::cCSRPEMSize> mCSR;
 };
 
 #endif
