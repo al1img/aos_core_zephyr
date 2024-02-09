@@ -75,7 +75,7 @@ private:
     Storage                                 mStorage;
     Provisioning                            mProvisioning;
 
-    aos::StaticString<aos::crypto::cCSRPEMSize> mCSR;
+    aos::StaticString<aos::crypto::cCSRPEMLen> mCSR;
 };
 
 #endif
